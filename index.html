@@ -1,10 +1,761 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Teste</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KING - SISTEMA DE AUTENTICAÇÃO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-blue: #00ffff;
+            --glow-strong: rgba(0, 255, 255, 0.8);
+            --glow-medium: rgba(0, 255, 255, 0.6);
+            --dark-bg: rgba(10, 10, 10, 0.85);
+            --success-green: #00ff00;
+            --error-red: #ff0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            color: #e0e0e0;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .king-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 72px;
+            font-weight: 900;
+            color: var(--neon-blue);
+            text-shadow: 
+                0 0 10px var(--neon-blue),
+                0 0 20px var(--neon-blue),
+                0 0 30px var(--neon-blue),
+                0 0 40px var(--glow-strong),
+                0 0 70px var(--glow-strong),
+                0 0 80px var(--glow-strong);
+            letter-spacing: 15px;
+            z-index: 5;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                text-shadow: 
+                    0 0 10px var(--neon-blue),
+                    0 0 20px var(--neon-blue),
+                    0 0 30px var(--neon-blue),
+                    0 0 40px var(--glow-strong),
+                    0 0 70px var(--glow-strong);
+            }
+            50% {
+                text-shadow: 
+                    0 0 20px var(--neon-blue),
+                    0 0 30px var(--neon-blue),
+                    0 0 40px var(--neon-blue),
+                    0 0 50px var(--glow-strong),
+                    0 0 80px var(--glow-strong),
+                    0 0 100px var(--glow-strong);
+            }
+        }
+
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        .auth-box {
+            width: 95%;
+            max-width: 450px;
+            background: var(--dark-bg);
+            border: 2px solid var(--neon-blue);
+            border-radius: 25px;
+            padding: 50px 40px;
+            box-shadow: 
+                0 0 20px var(--neon-blue), 
+                0 0 40px var(--glow-strong), 
+                inset 0 0 15px var(--glow-medium);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            text-align: center;
+        }
+
+        .auth-icon {
+            font-size: 80px;
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+            text-shadow: 
+                0 0 20px var(--neon-blue),
+                0 0 40px var(--glow-strong);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px var(--neon-blue);
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neon-blue);
+            font-size: 18px;
+            z-index: 1;
+        }
+
+        .key-input {
+            width: 100%;
+            padding: 16px 16px 16px 50px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .key-input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 
+                0 0 15px var(--neon-blue),
+                0 0 25px var(--glow-medium),
+                inset 0 0 10px rgba(0, 255, 255, 0.1);
+        }
+
+        .key-input::placeholder {
+            color: #555;
+            letter-spacing: 2px;
+        }
+
+        .verify-button {
+            width: 100%;
+            padding: 18px;
+            background: var(--neon-blue);
+            color: #000;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 15px var(--neon-blue),
+                0 0 30px var(--glow-medium);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verify-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 0 25px var(--neon-blue),
+                0 0 50px var(--glow-strong);
+        }
+
+        .verify-button:active {
+            transform: translateY(-1px);
+        }
+
+        .verify-button.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .verify-button.success {
+            background: var(--success-green);
+            box-shadow: 
+                0 0 20px var(--success-green),
+                0 0 40px rgba(0, 255, 0, 0.6);
+        }
+
+        .verify-button.error {
+            background: var(--error-red);
+            box-shadow: 
+                0 0 20px var(--error-red),
+                0 0 40px rgba(255, 0, 0, 0.6);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .message.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid var(--error-red);
+            color: var(--error-red);
+            text-shadow: 0 0 10px var(--error-red);
+        }
+
+        .message.success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid var(--success-green);
+            color: var(--success-green);
+            text-shadow: 0 0 10px var(--success-green);
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.3);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .verify-button.loading .spinner {
+            display: block;
+        }
+
+        .verify-button.loading .button-text {
+            display: none;
+        }
+
+        .panel {
+            display: none;
+            width: 95%;
+            max-width: 520px;
+            height: 480px;
+            background: var(--dark-bg);
+            border: 2px solid var(--neon-blue);
+            border-radius: 25px;
+            box-shadow: 
+                0 0 20px var(--neon-blue), 
+                0 0 40px var(--glow-strong), 
+                inset 0 0 15px var(--glow-medium);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .panel.active {
+            display: flex;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 15px;
+            border-right: 1px solid rgba(0, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .sidebar a {
+            color: #a0a0a0;
+            font-size: 26px;
+            margin-bottom: 35px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar a.active,
+        .sidebar a:hover {
+            color: var(--neon-blue);
+            text-shadow: 0 0 12px var(--neon-blue);
+            transform: scale(1.15);
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 8px var(--neon-blue);
+        }
+
+        #page-king .page-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+            gap: 20px;
+        }
+
+        .page-body {
+            width: 100%;
+        }
+
+        .main-button {
+            background: var(--neon-blue);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--glow-medium);
+        }
+
+        .main-button:hover {
+            box-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--glow-strong);
+            transform: translateY(-2px);
+        }
+
+        .main-button.opening {
+            background: var(--success-green);
+            box-shadow: 0 0 15px var(--success-green), 0 0 30px rgba(0, 255, 0, 0.6);
+        }
+
+        .button-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .button-message {
+            color: var(--success-green);
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 8px;
+            text-shadow: 0 0 8px var(--success-green);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+        }
+
+        .button-message.show {
+            opacity: 1;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .setting-item > span {
+            font-size: 16px;
+            white-space: nowrap;
+            margin-right: 15px;
+        }
+
+        .success-message {
+            width: 100%;
+            color: var(--success-green);
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 8px;
+            text-shadow: 0 0 8px var(--success-green);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: left;
+        }
+
+        .success-message.show {
+            opacity: 1;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider-toggle {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #222;
+            transition: .4s;
+            border-radius: 26px;
+            border: 1px solid #444;
+        }
+
+        .slider-toggle:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider-toggle {
+            background-color: var(--neon-blue);
+            box-shadow: 0 0 10px var(--glow-strong);
+            border-color: var(--neon-blue);
+        }
+
+        input:checked + .slider-toggle:before {
+            transform: translateX(24px);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to right, #1a1a1a 0%, #2a2a2a 100%);
+            outline: none;
+            border-radius: 10px;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 
+                0 0 10px var(--glow-medium),
+                0 0 20px rgba(0, 255, 255, 0.4),
+                inset 0 0 10px rgba(0, 255, 255, 0.2);
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            background: radial-gradient(circle, var(--neon-blue), #0099aa);
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 
+                0 0 15px var(--neon-blue),
+                0 0 25px var(--glow-strong),
+                0 0 35px rgba(0, 255, 255, 0.6),
+                inset 0 0 8px rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+            margin-top: -8px;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+            box-shadow: 
+                0 0 20px var(--neon-blue),
+                0 0 35px var(--glow-strong),
+                0 0 50px rgba(0, 255, 255, 0.8),
+                inset 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            background: radial-gradient(circle, var(--neon-blue), #0099aa);
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 
+                0 0 15px var(--neon-blue),
+                0 0 25px var(--glow-strong),
+                0 0 35px rgba(0, 255, 255, 0.6),
+                inset 0 0 8px rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .range-slider::-moz-range-thumb:hover {
+            transform: scale(1.3);
+            box-shadow: 
+                0 0 20px var(--neon-blue),
+                0 0 35px var(--glow-strong),
+                0 0 50px rgba(0, 255, 255, 0.8),
+                inset 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+
+        .range-slider::-webkit-slider-runnable-track {
+            height: 10px;
+            border-radius: 10px;
+            background: transparent;
+        }
+
+        .range-slider::-moz-range-track {
+            height: 10px;
+            border-radius: 10px;
+            background: transparent;
+            border: none;
+        }
+
+        .range-value {
+            margin-left: 15px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--neon-blue);
+            text-shadow: 
+                0 0 10px var(--neon-blue),
+                0 0 15px var(--glow-medium),
+                0 0 20px rgba(0, 255, 255, 0.5);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .panel.active {
+            animation: slideIn 0.5s ease;
+        }
+        
+    </style>
 </head>
-<body style="background:white;">
-  <h1>FUNCIONOU 🔥</h1>
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+
+    <h1 class="king-title">ARIEL VSK💎</h1>
+
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box">
+            <div class="auth-icon">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <h1 class="auth-title">ARIEL VSK💎</h1>
+            <p class="auth-subtitle">SISTEMA DE AUTENTICAÇÃO</p>
+            
+            <div class="input-group">
+                <i class="fa-solid fa-key input-icon"></i>
+                <input type="text" class="key-input" id="keyInput" placeholder="DIGITE SUA KEY" maxlength="20">
+            </div>
+            
+            <button class="verify-button" id="verifyButton">
+                <span class="button-text">
+                    <i class="fa-solid fa-shield-halved"></i> VERIFICAR KEY
+                </span>
+                <div class="spinner"></div>
+            </button>
+            
+            <div class="message" id="message"></div>
+        </div>
+    </div>
+
+    <div class="panel" id="mainPanel">
+        <nav class="sidebar">
+            <a data-page="page-aimbot" class="active" title="Aimbot"><i class="fa-solid fa-bullseye"></i></a>
+            <a data-page="page-arma" title="Arma"><i class="fa-solid fa-crosshairs"></i></a>
+            <a data-page="page-diversos" title="Diversos"><i class="fa-solid fa-sliders"></i></a>
+            <a data-page="page-security" title="Segurança"><i class="fa-solid fa-shield-halved"></i></a>
+            <a data-page="page-king" title="Injeção"><i class="fa-solid fa-bolt"></i></a>
+        </nav>
+
+        <main class="content">
+            <div id="page-king" class="page">
+                <h2 class="page-title">ARIEL VSK💎</h2>
+                <div class="page-body">
+                    <div class="button-container">
+                        <button class="main-button" data-game="FREE FIRE" data-intent="intent://#Intent;scheme=freefire;package=com.dts.freefireth;end">ABRIR FREE FIRE</button>
+                        <div class="button-message"></div>
+                    </div>
+                    <div class="button-container">
+                        <button class="main-button" data-game="FREE FIRE MAX" data-intent="intent://#Intent;scheme=freefire;package=com.dts.freefiremax;end">ABRIR FREE FIRE MAX</button>
+                        </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ===== MATRIX BACKGROUND =====
+        const canvas = document.getElementById("matrix-canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const letters = "01";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let x = 0; x < columns; x++) drops[x] = 1;
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00ffff";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 33);
+
+        // ===== LOGIN / KEY =====
+        const verifyButton = document.getElementById("verifyButton");
+        const keyInput = document.getElementById("keyInput");
+        const message = document.getElementById("message");
+        const authContainer = document.getElementById("authContainer");
+        const mainPanel = document.getElementById("mainPanel");
+
+        verifyButton.onclick = () => {
+            verifyButton.classList.add("loading");
+
+            setTimeout(() => {
+                verifyButton.classList.remove("loading");
+
+                if (keyInput.value.trim() !== "") {
+                    verifyButton.classList.add("success");
+                    message.textContent = "KEY ACEITA!";
+                    message.className = "message success show";
+
+                    setTimeout(() => {
+                        authContainer.style.display = "none";
+                        mainPanel.classList.add("active");
+                        document.getElementById("page-king").classList.add("active");
+                    }, 800);
+
+                } else {
+                    verifyButton.classList.add("error");
+                    message.textContent = "KEY INVÁLIDA";
+                    message.className = "message error show";
+                }
+            }, 1200);
+        };
+
+        // ===== MENU =====
+        document.querySelectorAll(".sidebar a").forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll(".sidebar a").forEach(b => b.classList.remove("active"));
+                document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+
+                btn.classList.add("active");
+                document.getElementById(btn.dataset.page)?.classList.add("active");
+            };
+        });
+    </script>
+
 </body>
 </html>
